@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./avatar-ascii.svg" width="460" alt="Abdur Rahman Khan"/>
+<img src="./pennywise-eye.svg" width="460" alt="Abdur Rahman Khan"/>
 
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1000&color=A78BFA&center=true&vCenter=true&width=700&lines=Abdur+Rahman+Khan;Full-Stack+%26+AI+Systems+Builder;Next.js+15+%7C+TypeScript+%7C+Python+%7C+ML;Architecting+High-Performance+Web+Platforms;Applied+Machine+Learning+%26+NLP+Systems)](https://git.io/typing-svg)
 
