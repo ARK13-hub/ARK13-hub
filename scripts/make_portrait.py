@@ -32,10 +32,12 @@ to bottom, frozen at the end so it prints once and stops.
 import argparse
 import sys
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 import numpy as np
 from PIL import Image
-from rembg import remove
 
 RAMP = " .`:-=+*cs#%@"     # bright/sparse -> dark/dense; leading space = blank
 COLS = 90                  # below ~88 the face muddies; far above it dominates
@@ -60,19 +62,27 @@ def prep(path, crop=None):
     if crop:
         src = src.crop(crop)
 
-    cut = remove(src)
-    alpha = np.array(cut.split()[-1])
+    alpha = None
+    try:
+        from rembg import remove
+        cut = remove(src)
+        alpha = np.array(cut.split()[-1])
+        white = Image.new("RGBA", cut.size, (255, 255, 255, 255))
+        gray = np.array(Image.alpha_composite(white, cut).convert("L"))
+    except Exception:
+        gray = np.array(src.convert("L"))
 
-    # Composite onto white so everything outside the subject maps to the blank
-    # end of the ramp. Skip this and the background fills with @ and %.
-    white = Image.new("RGBA", cut.size, (255, 255, 255, 255))
-    gray = np.array(Image.alpha_composite(white, cut).convert("L"))
+    if cv2 is not None:
+        try:
+            gray = cv2.bilateralFilter(gray, 11, 50, 50)      # smooth skin, keep edges
+            gray = cv2.createCLAHE(clipLimit=CLAHE_CLIP,
+                                   tileGridSize=(8, 8)).apply(gray)
+        except Exception:
+            pass
 
-    gray = cv2.bilateralFilter(gray, 11, 50, 50)      # smooth skin, keep edges
-    gray = cv2.createCLAHE(clipLimit=CLAHE_CLIP,
-                           tileGridSize=(8, 8)).apply(gray)
     gray = (255.0 * (gray / 255.0) ** CURVE).astype("uint8")
-    gray[alpha < 20] = 255                            # force the matte to white
+    if alpha is not None:
+        gray[alpha < 20] = 255                            # force the matte to white
     return Image.fromarray(gray)
 
 
